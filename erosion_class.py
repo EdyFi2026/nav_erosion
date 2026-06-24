@@ -57,10 +57,10 @@ MID_EROSION_PCT = 45.0   # +12% to +45%: in the heart of the decay; above => ear
 
 EROSION_LABELS = {
     "LOW_EROSION":        "Low-erosion / index-like",
-    "BELOW_FLOOR":        "Below floor — model may be breaking",
-    "MATURE_NEAR_FLOOR":  "Mature — near floor (target zone)",
+    "BELOW_FLOOR":        "Below floor - model may be breaking",
+    "MATURE_NEAR_FLOOR":  "Mature - near floor (target zone)",
     "MID_EROSION":        "Mid-erosion",
-    "EARLY_HIGH_PREMIUM": "Early — high premium (most NAV risk)",
+    "EARLY_HIGH_PREMIUM": "Early - high premium (most NAV risk)",
 }
 
 # The class the tool is primarily built to surface.
@@ -156,7 +156,7 @@ def main() -> None:
             json.dump(board, f, indent=2)
         print(f"\nWrote erosion classes back into {args.board}")
     else:
-        print("\n(dry run — pass --write to backfill the classes into the file)")
+        print("\n(dry run - pass --write to backfill the classes into the file)")
 
 
 if __name__ == "__main__":
