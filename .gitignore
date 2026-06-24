@@ -1,0 +1,68 @@
+# ─────────────────────────────────────────────────────────────
+# NAV-Erosion Screener — .gitignore
+# ─────────────────────────────────────────────────────────────
+
+# --- Secrets / machine-specific (NEVER commit) ---
+# NOTE: git does NOT support trailing inline comments — a "#" mid-line becomes
+# part of the pattern. Keep every comment on its own line.
+# CLAUDE.local.md: your local paths + where the FMP key lives
+CLAUDE.local.md
+# .env: dotenv holding the FMP_API_KEY
+.env
+.env.*
+!.env.example
+*.key
+*_secret*
+*apikey*
+
+# --- Python ---
+.venv/
+venv/
+env/
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ipynb_checkpoints/
+
+# --- IDE ---
+# .idea/: PyCharm
+.idea/
+.vscode/
+*.iml
+
+# --- OS cruft ---
+.DS_Store
+Thumbs.db
+
+# ─────────────────────────────────────────────────────────────
+# Project data & outputs
+# Everything below is regeneratable via fetch_data.py / build_board.py,
+# so it's ignored by default — EXCEPT the two sample funds, kept so the
+# repo runs out-of-the-box without an API key.
+# ─────────────────────────────────────────────────────────────
+
+# Ignore all cached fund data...
+data/*.csv
+data/*.json
+
+# ...but keep the TSLY + NVDY samples so the project is demoable as-is.
+!data/TSLY_prices.csv
+!data/TSLY_dividends.csv
+!data/NVDY_prices.csv
+!data/NVDY_dividends.csv
+
+# Dated ranked boards (regenerated each run)
+ranked_board_*.json
+
+# Generated artifacts: charts, PDFs, HTML reports, viz data
+output/
+*.png
+*.pdf
+viz_data.json
+
+# Keep committed docs that happen to be PDFs? If you want the investor
+# guide tracked, un-ignore it explicitly:
+# !NAV_Erosion_Model_Explained.pdf

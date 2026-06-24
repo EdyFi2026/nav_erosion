@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python -c \"import fetch_data; print\\('resolved key:', fetch_data.resolve_api_key\\(None\\)\\)\")",
+      "Bash(git check-ignore *)",
+      "Bash(grep -iE \"\\\\.env$|\\\\.idea|secret|apikey|\\\\.key$\")",
+      "Bash(git reset *)",
+      "Bash(git -c core.safecrlf=false status)"
+    ]
+  }
+}
