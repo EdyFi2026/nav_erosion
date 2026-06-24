@@ -37,17 +37,26 @@ export FMP_API_KEY=your_key_here
 $env:FMP_API_KEY = "your_key_here"
 ```
 
-Install dependencies, then run the pipeline:
+Install dependencies, then run the whole pipeline with one command:
 
 ```bash
 pip install -r requirements.txt
 
+python run.py                 # fetch -> rank -> classify, in order
+python run.py --no-fetch      # skip the download, reuse data already in data/
+
+python screener.py TSLY -v    # report on one fund
+python screener.py --list     # see cached funds
+```
+
+`run.py` runs the three steps below in order, figures out today's board filename
+for you, and stops with a plain-English message if any step fails. You only need
+the individual commands if you want to run a single step on its own:
+
+```bash
 python fetch_data.py --all                       # 1. get the data
 python build_board.py --data-dir data            # 2. rank every fund
 python erosion_class.py ranked_board_<date>.json --write   # 3. classify
-
-python screener.py TSLY -v                        # report on one fund
-python screener.py --list                         # see cached funds
 ```
 
 ---
