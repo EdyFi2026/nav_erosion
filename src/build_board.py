@@ -39,7 +39,7 @@ from pathlib import Path
 
 import pandas as pd
 
-sys.path.insert(0, str(Path(__file__).parent))
+sys.path.insert(0, str(Path(__file__).resolve().parent))
 from screener import load_data
 from nav_erosion_model import analyze_fund, find_plateau
 from entry_score import compute_board

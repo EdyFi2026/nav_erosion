@@ -30,28 +30,40 @@ The single most valuable output is often a *negative* signal: "don't buy yet."
 
 ## The pipeline (current working flow)
 
-Three commands, run in order. Confirm exact filenames against the repo — the
-codebase may have moved past what's described here.
+The whole pipeline runs from one root command (preferred):
 
-1. `python fetch_data.py --all` — pull raw price + dividend CSVs (~105 tickers)
-2. `python build_board.py --data-dir data` — fit the model on every cached
+    python run.py              # fetch -> build board -> classify erosion
+    python run.py --no-fetch   # skip the download, use data already cached
+
+Under the hood that chains the three engine scripts (now under `src/`), in order.
+Confirm exact filenames against the repo — the codebase may have moved past
+what's described here.
+
+1. `python src/fetch_data.py --all` — pull raw price + dividend CSVs (~105 tickers)
+2. `python src/build_board.py --data-dir data` — fit the model on every cached
    ticker, compute `entry_score`, write a dated ranked JSON board
-3. `python erosion_class.py ranked_board_<date>.json --write` — backfill the
+3. `python src/erosion_class.py ranked_board_<date>.json --write` — backfill the
    erosion bucket onto every fund record
 
-Single-fund report: `python screener.py TSLY -v`
+Single-fund report: `python src/screener.py TSLY -v`
 
 ## Key files
 
+Engine/library modules live under `src/`; root holds the entry points (`run.py`,
+`main.py`); the synthetic-data test lives under `tests/`; generated boards,
+charts, and PDFs go under `output/`.
+
 | File | Role |
 |------|------|
-| `nav_erosion_model.py` | Core engine: decay fit, split/regime detection, plateau, total return, backtest, `analyze_fund()`. Don't run directly. |
-| `screener.py` | CLI for one ticker → formatted text report. |
-| `fetch_data.py` | Pulls raw FMP data → two CSVs per ticker. Std-lib only. |
-| `build_board.py` | Fits every cached ticker → ranked JSON board. |
-| `erosion_class.py` | Adds an erosion bucket to each fund on the board. |
-| `entry_score.py` | The transparent composite score (replaced legacy `signal_score`). |
-| `test_synthetic.py` | Validates parameter recovery on synthetic data. |
+| `run.py` | Single root entry point: chains fetch → build_board → erosion_class. |
+| `src/nav_erosion_model.py` | Core engine: decay fit, split/regime detection, plateau, total return, backtest, `analyze_fund()`. Don't run directly. |
+| `src/screener.py` | CLI for one ticker → formatted text report. |
+| `src/fetch_data.py` | Pulls raw FMP data → two CSVs per ticker. Std-lib only. |
+| `src/build_board.py` | Fits every cached ticker → ranked JSON board. |
+| `src/erosion_class.py` | Adds an erosion bucket to each fund on the board. |
+| `src/entry_score.py` | The transparent composite score (replaced legacy `signal_score`). |
+| `src/build_viz_data.py` | Builds visualization data (writes `output/viz_data.json`). |
+| `tests/test_synthetic.py` | Validates parameter recovery on synthetic data. |
 
 ## Deep-detail rule files (load on demand)
 

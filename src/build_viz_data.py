@@ -1,8 +1,16 @@
 """Build visualization data for the artifact."""
 import sys
-sys.path.insert(0, "/home/claude/nav_erosion")
 import json
 from pathlib import Path
+
+# This file lives in src/; resolve everything relative to the project root so it
+# runs anywhere (no reliance on the original chat environment's absolute paths).
+SRC_DIR = Path(__file__).resolve().parent
+PROJECT_ROOT = SRC_DIR.parent
+DATA_DIR = PROJECT_ROOT / "data"
+OUTPUT_DIR = PROJECT_ROOT / "output"
+
+sys.path.insert(0, str(SRC_DIR))
 import pandas as pd
 import numpy as np
 from screener import load_data
@@ -10,7 +18,7 @@ from nav_erosion_model import analyze_fund, decay_model
 
 results = {}
 for sym in ["TSLY", "NVDY"]:
-    prices, dividends = load_data(sym, Path("/home/claude/nav_erosion/data"))
+    prices, dividends = load_data(sym, DATA_DIR)
     r = analyze_fund(sym, prices, dividends)
     fit = r["fit"]
     zone = r["zone"]
@@ -50,9 +58,11 @@ for sym in ["TSLY", "NVDY"]:
         },
     }
 
-with open("/tmp/viz_data.json", "w") as f:
+OUTPUT_DIR.mkdir(exist_ok=True)
+viz_path = OUTPUT_DIR / "viz_data.json"
+with open(viz_path, "w") as f:
     json.dump(results, f, default=str)
 
 for s, r in results.items():
     print(f'{s}: {len(r["series"])} points, floor=${r["floor"]:.2f}, R^2={r["r2"]:.2f}')
-print("\nSaved viz data: /tmp/viz_data.json")
+print(f"\nSaved viz data: {viz_path}")

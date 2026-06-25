@@ -1,6 +1,10 @@
 """Validate the NAV erosion model on REALISTIC synthetic data."""
 import sys
-sys.path.insert(0, "/home/claude/nav_erosion")
+from pathlib import Path
+
+# This test lives in tests/; the engine lives in ../src. Resolve relative to this
+# file so it runs from any working directory.
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 import numpy as np
 import pandas as pd
 from nav_erosion_model import (

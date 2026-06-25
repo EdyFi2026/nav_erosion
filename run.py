@@ -34,7 +34,13 @@ import subprocess
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
+SRC = ROOT / "src"          # engine scripts live here after the src/ refactor
 PY = sys.executable or "python"
+
+
+def _script(name: str) -> str:
+    """Absolute path to an engine script in src/ (cwd-independent)."""
+    return str(SRC / name)
 
 
 def _run(cmd, capture: bool):
@@ -93,7 +99,7 @@ def _find_board(stdout: str, cutoff: float) -> Path | None:
 def step_fetch(data_dir: str) -> None:
     print("\n>>> Step 1 of 3 - Fetching raw prices & distributions (fetch_data.py)")
     print("    (this hits FMP for ~105 tickers and can take a couple of minutes)\n")
-    rc, _, _ = _run([PY, "fetch_data.py", "--all", "--data-dir", data_dir],
+    rc, _, _ = _run([PY, _script("fetch_data.py"), "--all", "--data-dir", data_dir],
                     capture=False)
     if rc != 0:
         _fail(
@@ -114,7 +120,7 @@ def step_build(data_dir: str) -> Path:
     print("\n>>> Step 2 of 3 - Fitting the model & building the ranked board "
           "(build_board.py)\n")
     cutoff = time.time()
-    rc, out, err = _run([PY, "build_board.py", "--data-dir", data_dir],
+    rc, out, err = _run([PY, _script("build_board.py"), "--data-dir", data_dir],
                         capture=True)
     if out:
         print(out.rstrip())
@@ -146,7 +152,7 @@ def step_build(data_dir: str) -> Path:
 
 def step_classify(board: Path) -> None:
     print("\n>>> Step 3 of 3 - Classifying erosion buckets (erosion_class.py)\n")
-    rc, out, err = _run([PY, "erosion_class.py", str(board.name), "--write"],
+    rc, out, err = _run([PY, _script("erosion_class.py"), str(board.name), "--write"],
                         capture=True)
     if out:
         print(out.rstrip())
@@ -184,7 +190,7 @@ def main() -> None:
     print("  Pipeline complete.")
     print(f"{'=' * 64}")
     print(f"  Ranked, erosion-classified board:  {board.name}")
-    print("  Single-fund report:  python screener.py TSLY -v")
+    print("  Single-fund report:  python src/screener.py TSLY -v")
     print()
 
 

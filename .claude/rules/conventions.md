@@ -37,8 +37,13 @@ the command line. When you add or change anything user-facing:
 
 ## File layout & outputs
 
-- Engine code under `src/` (after refactor); cached data under `data/`; generated
+- Engine/library modules live under `src/` (and form the `src` package via
+  `src/__init__.py`). Root holds only the entry points `run.py` and `main.py`;
+  tests live under `tests/`; cached data under `data/`; generated
   boards/charts/PDFs under `output/`.
+- Root entry points add `src/` to `sys.path` via a path **relative to the file**
+  (`Path(__file__).parent / "src"`), never via the current working directory.
+  No hardcoded absolute paths anywhere.
 - Boards are **dated** (`ranked_board_YYYY-MM-DD.json`) and regeneratable.
 - Workflow should stay **automatable**: self-refreshing fund universe discovery,
   re-run monthly to catch regime drift.

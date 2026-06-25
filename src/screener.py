@@ -23,8 +23,11 @@ from pathlib import Path
 import pandas as pd
 import numpy as np
 
-sys.path.insert(0, str(Path(__file__).parent))
+sys.path.insert(0, str(Path(__file__).resolve().parent))
 from nav_erosion_model import analyze_fund
+
+# Default data cache lives at <project_root>/data (this file is in src/).
+DEFAULT_DATA_DIR = Path(__file__).resolve().parent.parent / "data"
 
 
 def load_data(symbol: str, base_dir: Path) -> tuple:
@@ -180,7 +183,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("symbol", nargs="?", default=None,
                         help="Ticker symbol (e.g. TSLY)")
-    parser.add_argument("--data-dir", default="/home/claude/nav_erosion/data",
+    parser.add_argument("--data-dir", default=str(DEFAULT_DATA_DIR),
                         help="Directory containing <SYM>_prices.json + <SYM>_dividends.json")
     parser.add_argument("-v", "--verbose", action="store_true",
                         help="Show full trade log")

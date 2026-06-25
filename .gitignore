@@ -58,7 +58,9 @@ data/*.json
 ranked_board_*.json
 
 # Generated artifacts: charts, PDFs, HTML reports, viz data
-output/
+# Ignore the contents but keep the folder itself (via .gitkeep).
+output/*
+!output/.gitkeep
 *.png
 *.pdf
 viz_data.json
