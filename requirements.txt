@@ -1,0 +1,14 @@
+# NAV-Erosion Screener — runtime dependencies
+# Install with:  pip install -r requirements.txt
+#
+# Note: fetch_data.py is intentionally standard-library only and needs none of
+# these — it runs anywhere Python 3.10+ is available.
+
+# core (required to run the screener/pipeline)
+pandas==3.0.3
+numpy==2.5.0
+scipy==1.18.0
+
+# optional (only needed for charts / PDF / viz)
+matplotlib==3.11.0
+reportlab==5.0.0
