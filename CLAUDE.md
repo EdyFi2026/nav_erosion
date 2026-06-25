@@ -49,8 +49,7 @@ Single-fund report: `python src/screener.py TSLY -v`
 
 ## Key files
 
-Engine/library modules live under `src/`; root holds the entry points (`run.py`,
-`main.py`); the synthetic-data test lives under `tests/`; generated boards,
+Engine/library modules live under `src/`; root holds the entry points (`run.py`); the synthetic-data test lives under `tests/`; generated boards,
 charts, and PDFs go under `output/`.
 
 | File | Role |

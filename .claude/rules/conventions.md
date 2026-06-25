@@ -38,7 +38,7 @@ the command line. When you add or change anything user-facing:
 ## File layout & outputs
 
 - Engine/library modules live under `src/` (and form the `src` package via
-  `src/__init__.py`). Root holds only the entry points `run.py` and `main.py`;
+  `src/__init__.py`). Root holds only the entry points `run.py`;
   tests live under `tests/`; cached data under `data/`; generated
   boards/charts/PDFs under `output/`.
 - Root entry points add `src/` to `sys.path` via a path **relative to the file**

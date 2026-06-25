@@ -7,6 +7,7 @@
 # part of the pattern. Keep every comment on its own line.
 # CLAUDE.local.md: your local paths + where the FMP key lives
 CLAUDE.local.md
+.claude/settings.local.json
 # .env: dotenv holding the FMP_API_KEY
 .env
 .env.*
