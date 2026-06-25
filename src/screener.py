@@ -30,6 +30,29 @@ from nav_erosion_model import analyze_fund
 DEFAULT_DATA_DIR = Path(__file__).resolve().parent.parent / "data"
 
 
+def _read_csv(path: Path, required_cols: tuple) -> pd.DataFrame:
+    """Read a cached CSV, turning pandas' cryptic parse errors into plain English.
+
+    A malformed or empty CSV otherwise surfaces as a raw pandas traceback (or, in
+    the board builder, an opaque 'EmptyDataError' line). Here it becomes a clear
+    'this file is empty/malformed — re-fetch it' message instead.
+    """
+    try:
+        df = pd.read_csv(path, parse_dates=["date"])
+    except Exception as e:
+        raise ValueError(
+            f"Could not read {path.name} ({type(e).__name__}). The file looks "
+            f"empty or malformed - re-fetch it with: python src/fetch_data.py "
+            f"{path.stem.split('_')[0]}")
+    missing = [c for c in required_cols if c not in df.columns]
+    if missing:
+        raise ValueError(
+            f"{path.name} is missing the column(s) {missing}. Expected "
+            f"{list(required_cols)} - re-fetch it with: python src/fetch_data.py "
+            f"{path.stem.split('_')[0]}")
+    return df
+
+
 def load_data(symbol: str, base_dir: Path) -> tuple:
     """Load FMP data for prices and dividends. Prefer CSV, fall back to JSON."""
     pf_csv = base_dir / f"{symbol}_prices.csv"
@@ -38,7 +61,7 @@ def load_data(symbol: str, base_dir: Path) -> tuple:
     df_json = base_dir / f"{symbol}_dividends.json"
 
     if pf_csv.exists():
-        prices = pd.read_csv(pf_csv, parse_dates=["date"])
+        prices = _read_csv(pf_csv, ("date", "close"))
     elif pf_json.exists():
         with open(pf_json) as f:
             rows = json.load(f)
@@ -52,7 +75,7 @@ def load_data(symbol: str, base_dir: Path) -> tuple:
             f"No price data for {symbol} at {pf_csv} or {pf_json}")
 
     if df_csv.exists():
-        dividends = pd.read_csv(df_csv, parse_dates=["date"])
+        dividends = _read_csv(df_csv, ("date", "dividend"))
     elif df_json.exists():
         with open(df_json) as f:
             rows = json.load(f)
@@ -207,8 +230,21 @@ def main():
     if not args.symbol:
         parser.error("symbol required (or use --list)")
 
-    prices, dividends = load_data(args.symbol.upper(), data_dir)
-    result = analyze_fund(args.symbol.upper(), prices, dividends)
+    symbol = args.symbol.upper()
+    try:
+        prices, dividends = load_data(symbol, data_dir)
+    except (FileNotFoundError, ValueError) as e:
+        sys.exit(
+            f"\nCan't analyze {symbol}: {e}\n\n"
+            f"Cached data lives in '{data_dir}'. Fetch this ticker with:\n"
+            f"  python src/fetch_data.py {symbol}")
+    try:
+        result = analyze_fund(symbol, prices, dividends)
+    except ValueError as e:
+        # e.g. too short a history to fit — explain rather than dump a traceback.
+        sys.exit(f"\nCan't fit a model for {symbol}: {e}\n\n"
+                 "This usually means too little price history (a brand-new fund). "
+                 "Try again once more data has accumulated.")
     print(format_report(result, verbose=args.verbose))
 
 

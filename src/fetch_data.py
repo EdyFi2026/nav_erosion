@@ -286,7 +286,8 @@ def main():
         print("Not written:")
         for sym, why in failed:
             print(f"  {sym}: {why}")
-    print(f"\nNext: python build_board.py --data-dir {args.data_dir}")
+    print(f"\nNext: python run.py --no-fetch   "
+          f"(or: python src/build_board.py --data-dir {args.data_dir})")
 
 
 if __name__ == "__main__":

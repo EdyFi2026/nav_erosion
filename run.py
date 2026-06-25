@@ -200,3 +200,12 @@ if __name__ == "__main__":
     except KeyboardInterrupt:
         print("\nInterrupted. Nothing was left half-written by run.py itself.")
         sys.exit(130)
+    except Exception as e:
+        # Last-resort guard: a non-developer should never see a raw traceback.
+        print(f"\n{'=' * 64}")
+        print("  X  Something unexpected went wrong in run.py.")
+        print(f"{'=' * 64}")
+        print(f"  {type(e).__name__}: {e}")
+        print("\n  This is a problem with the orchestrator itself, not your data.")
+        print("  Try running again; if it keeps happening, note the line above.\n")
+        sys.exit(1)

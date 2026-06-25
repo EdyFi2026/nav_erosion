@@ -134,6 +134,12 @@ def _summarize(board: Dict[str, Any]) -> None:
         print(f"\n{TARGET_CLASS} funds: {', '.join(sorted(targets))}")
 
 
+def _fail(msg: str) -> None:
+    """Print a plain-English error (what went wrong + what to do) and exit non-zero."""
+    print(f"\n{msg.rstrip()}\n", file=sys.stderr)
+    sys.exit(1)
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="Classify erosion stage on a board JSON.")
     parser.add_argument("board", help="Path to a ranked_board_<date>.json file")
@@ -145,8 +151,31 @@ def main() -> None:
         with open(args.board) as f:
             board = json.load(f)
     except FileNotFoundError:
-        print(f"Board file not found: {args.board}")
-        sys.exit(1)
+        _fail(
+            f"Board file not found: '{args.board}'.\n\n"
+            "What to do:\n"
+            "  - Build a board first:   python run.py --no-fetch\n"
+            "  - Then point this at the ranked_board_<date>.json it writes."
+        )
+    except json.JSONDecodeError as e:
+        _fail(
+            f"'{args.board}' is not valid JSON ({e}).\n\n"
+            "The file may be truncated or half-written. Rebuild it:\n"
+            "  python run.py --no-fetch"
+        )
+
+    if not isinstance(board, dict) or "funds" not in board:
+        _fail(
+            f"'{args.board}' doesn't look like a ranked board "
+            "(no top-level 'funds' list).\n\n"
+            "Point this at a ranked_board_<date>.json produced by build_board.py."
+        )
+    if not board["funds"]:
+        _fail(
+            f"The board '{args.board}' has no funds to classify.\n\n"
+            "What to do: rebuild it (the data folder may have been empty):\n"
+            "  python run.py --no-fetch"
+        )
 
     classify_board(board)
     _summarize(board)

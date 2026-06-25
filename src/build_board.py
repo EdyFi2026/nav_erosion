@@ -45,6 +45,16 @@ from nav_erosion_model import analyze_fund, find_plateau
 from entry_score import compute_board
 
 
+def _fail(msg: str) -> None:
+    """Print a plain-English error (what went wrong + what to do) and exit non-zero.
+
+    Same spirit as fetch_data.py: a non-developer should see a clear sentence,
+    never a raw traceback.
+    """
+    print(f"\n{msg.rstrip()}\n", file=sys.stderr)
+    sys.exit(1)
+
+
 def _round(x, n=2):
     """Round, but pass through None safely."""
     return None if x is None else round(float(x), n)
@@ -150,9 +160,42 @@ def main():
 
     data_dir = Path(args.data_dir)
     if not data_dir.exists():
-        parser.error(f"data dir not found: {data_dir}")
+        _fail(
+            f"Data folder not found: '{data_dir}'.\n\n"
+            "What to do:\n"
+            "  - Check the path, or pass --data-dir <folder>.\n"
+            "  - The repo ships TSLY and NVDY samples in 'data/', so this works\n"
+            "    out of the box:\n"
+            "        python src/build_board.py --data-dir data"
+        )
+    if not data_dir.is_dir():
+        _fail(f"'{data_dir}' is not a folder. Point --data-dir at the data directory.")
+
+    # Empty folder vs. folder full of unfittable CSVs are different problems —
+    # diagnose the empty case up front so the message is specific.
+    tickers = discover_tickers(data_dir)
+    if not tickers:
+        _fail(
+            f"No cached fund data found in '{data_dir}'.\n\n"
+            "I look there for <SYM>_prices.csv (or .json) files and found none.\n\n"
+            "What to do:\n"
+            "  - Download data first:        python src/fetch_data.py --all\n"
+            "  - Or use the bundled samples:  python src/build_board.py --data-dir data"
+        )
 
     board = build_board(data_dir)
+
+    if not board["funds"]:
+        n_err = len(board["errors"])
+        detail = "\n".join(f"    {e['symbol']}: {e['error']}"
+                           for e in board["errors"][:10])
+        _fail(
+            f"Found {len(tickers)} ticker(s) in '{data_dir}' but none produced a "
+            "usable fit, so there is no board to write.\n\n"
+            f"The {n_err} ticker(s) failed like this:\n{detail}\n\n"
+            "What to do: the cached CSVs may be empty or malformed. Re-fetch them:\n"
+            "  python src/fetch_data.py --all"
+        )
 
     out = args.out or f"ranked_board_{board['as_of']}.json"
     with open(out, "w") as f:
